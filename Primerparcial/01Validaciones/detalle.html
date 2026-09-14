@@ -6,20 +6,34 @@
   <title>Detalle del Taller - CECyT 9</title>
   <link rel="stylesheet" href="./css/style.css">
 </head>
-
 <body>
   <header>
     <a href="./index.html">Volver al Catalogo</a>
-
   </header>
   <main>
     <section class="info-taller">
-      <article class="tarjeta">
+      <article class="tarjeta" data-id="1">
         <h2>Introduccion a Phyton</h2>
         <p>Instructor: Ing. Maria Conchita Alonso</p>
         <p>Fecha: 06/07/2026</p>
-        <p>Asistentes Registrados: 12/30 </p>
-        <p><a href="./registro.html">Registrar Asistencia</a></p>
+        <p>Asistentes Registrados: 12/30</p>
+        <p><a href="./registro.html?id=1">Registrar Asistencia</a></p>
+      </article>
+
+      <article class="tarjeta" data-id="2">
+        <h2>Redes y Compus</h2>
+        <p>Instructor: Ing. Homero H. Thomson</p>
+        <p>Fecha: 12/12/2012</p>
+        <p>Asistentes Registrados: 0/30</p>
+        <p><a href="./registro.html?id=2">Registrar Asistencia</a></p>
+      </article>
+
+      <article class="tarjeta" data-id="3">
+        <h2>Analisis de por que no me alcanza para el Nuevo Zelda</h2>
+        <p>Instructor: Ing. Por que eres Pobre</p>
+        <p>Fecha: 01/01/2000</p>
+        <p>Asistentes Registrados: 0/30</p>
+        <p><a href="./registro.html?id=3">Registrar Asistencia</a></p>
       </article>
     </section>
     <section class="Bitacora">
@@ -31,6 +45,21 @@
         </ul>
     </section>
   </main>
+  <script>
+    (function(){
+      var params = new URLSearchParams(location.search);
+      var id = params.get('id');
+      if(!id) return; // show all if no id
+      var tarjetas = document.querySelectorAll('.info-taller .tarjeta');
+      tarjetas.forEach(function(t){
+        if(t.getAttribute('data-id') !== id){
+          t.style.display = 'none';
+        } else {
+          t.style.borderColor = '#0f172a';
+        }
+      });
+    })();
+  </script>
 </body>
 
 </html>

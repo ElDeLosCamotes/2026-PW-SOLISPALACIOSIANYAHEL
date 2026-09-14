@@ -63,3 +63,58 @@ footer {
     text-decoration: underline;
     
 }
+
+/* Reglas para formulario de registro (misma estructura que otros estilos en esta carpeta) */
+.formulario-registro{
+    padding:1rem;
+    border:1px solid #e5e7ed;
+    border-radius:0.5rem;
+    background-color:#ffffff;
+    max-width:640px;
+    margin:0 auto;
+}
+
+.formulario-registro input{
+    width:100%;
+    padding:0.6rem;
+    margin:0.5rem 0 1rem 0;
+    border:1px solid #e5e7ed;
+    border-radius:0.375rem;
+    font-size:1rem;
+}
+
+.formulario-registro button{
+    padding:0.6rem 1rem;
+    background-color:#0f172a;
+    color:#ffffff;
+    border:none;
+    border-radius:0.375rem;
+    cursor:pointer;
+}
+
+.formulario-registro button:hover{
+    background-color:#0b1220;
+}
+
+.registro-fallido{
+    color:#b91c1c;
+    background-color:#fff5f5;
+    border:1px solid #fca5a5;
+    padding:0.5rem;
+    border-radius:0.375rem;
+    margin-bottom:0.75rem;
+}
+
+.input-invalido{
+    border-color:#b91c1c;
+    background-color:#fff5f5;
+}
+
+.registro-exitoso{
+    color:#065f46;
+    background-color:#ecfdf5;
+    border:1px solid #bbf7d0;
+    padding:0.5rem;
+    border-radius:0.375rem;
+    margin-bottom:0.75rem;
+}
