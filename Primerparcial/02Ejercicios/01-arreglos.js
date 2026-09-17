@@ -10,7 +10,8 @@ const talleres = [
 ];
 
 // TODO: forEach — imprime "- <nombre> (<inscritos>/<cupo>)" de cada taller
-
+console.log("Aplicando un ForEach para imprimir  ")
+talleres.forEach((t) => console.log (`- ${t.nombre} (${t.inscritos}/${t.cupo})`))
 // TODO: map — crea un arreglo `nombres` solo con los nombres de los talleres
 
 // TODO: filter — crea un arreglo `llenos` con los talleres donde inscritos >= cupo

@@ -2,62 +2,36 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registrar Asistencia - CECyT 9</title>
-  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header><a id="volver-detalle" href="./detalle.html">Volver al detalle del Taller</a></header>
-<main>
-  <form class="formulario-registro">
-    <h1>Formulario de Registro de Asistencia</h1>
+  <header>
+    <a href="detalle.html">&larr; Volver al taller</a>
+  </header>
 
-    <div id="mensaje" aria-live="polite"></div>
+  <main>
+    <form class="formulario-registro" id="form-registro" novalidate>
+      <h1>Registrar asistencia</h1>
 
-    <label for="nombre">Nombre Completo</label>
-    <input type="text" id="nombre" name="nombre" required>
+      <label for="nombre">Nombre completo</label>
+      <input type="text" id="nombre" name="nombre" required>
+      <span class="error" id="error-nombre"></span>
 
-    <label for="boleta">Boleta</label>
-    <input type="text" id="boleta" name="boleta" required>
+      <label for="boleta">Boleta (10 dígitos)</label>
+      <input type="text" id="boleta" name="boleta" required>
+      <span class="error" id="error-boleta"></span>
 
-    <button type="submit">Registrar Asistencia</button>
-  </form>
-</main>
-<script>
-  var form = document.querySelector('.formulario-registro');
-  var mensaje = document.getElementById('mensaje');
-  // mostrar el taller en el header/volver según el id pasado en la URL
-  (function(){
-    var params = new URLSearchParams(location.search);
-    var id = params.get('id');
-    if(id){
-      var volver = document.getElementById('volver-detalle');
-      if(volver) volver.href = './detalle.html?id=' + encodeURIComponent(id);
-    }
-  })();
-  if(form){
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      mensaje.className = '';
-      mensaje.textContent = '';
-      var inputs = form.querySelectorAll('input');
-      inputs.forEach(function(i){ i.classList.remove('input-invalido'); });
+      <label for="fecha">Fecha de asistencia (DD/MM/AAAA)</label>
+      <input type="text" id="fecha" name="fecha" placeholder="DD/MM/AAAA" required>
+      <span class="error" id="error-fecha"></span>
 
-      var nombre = form.nombre.value || '';
-      var boleta = form.boleta.value || '';
+      <button type="submit">Registrar</button>
+      <p class="mensaje-exito" id="mensaje-exito"></p>
+    </form>
+  </main>
 
-      if(!nombre.trim() || !boleta.trim() || !/^\d+$/.test(boleta.trim())){
-        mensaje.className = 'registro-fallido';
-        mensaje.textContent = 'Error: por favor complete los campos correctamente. La boleta debe ser numérica.';
-        if(!nombre.trim()) form.nombre.classList.add('input-invalido');
-        if(!boleta.trim() || !/^\d+$/.test(boleta.trim())) form.boleta.classList.add('input-invalido');
-        return;
-      }
-
-      mensaje.className = 'registro-exitoso';
-      mensaje.textContent = 'Registro realizado correctamente.';
-      form.reset();
-    });
-  }
-</script>
+  <script src="validaciones.js"></script>
 </body>
 </html>
