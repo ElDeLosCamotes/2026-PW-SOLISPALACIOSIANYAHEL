@@ -35,18 +35,21 @@
                     <select name="operacion-arreglo" id="operacion-arreglo">
                         <option value="forEach">ForEach - Lista Simple</option>
                         <option value="map">map - Copia solo Nombres</option>
-                        <option value="filter">filter - Filtrar taleeres con cupo lleno</option>
-                        <option value="find">fid - Buscar por el nombre del instructor</option>
+                        <option value="filter">filter - Filtrar talleres con cupo lleno</option>
+                        <option value="find">find - Buscar por el nombre del instructor</option>
+                        <option value="reduce">reduce - Total de inscritos</option>
+                        <option value="disponibles">filter + map - Talleres con cupo disponible</option>
                     </select>
                 </div>
 
                 <button type="submit">Ejecutar</button>
             </form>
 
-            <output class="resultado" id="resultado-arreglo" for="form-arreglo"></output>
+            <output class="resultado" id="resultado-arreglo" for="formulario-arreglos"></output>
         </section>
     </main>
 
+    <script src="./js/01-arreglos.js"></script>
     <script src="./js/app.js"></script>
 </body>
 </html>
