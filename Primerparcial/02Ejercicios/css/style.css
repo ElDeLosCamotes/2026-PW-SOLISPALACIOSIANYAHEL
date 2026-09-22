@@ -1,0 +1,142 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: system-ui, Arial, Helvetica, sans-serif;
+	color: #1f2937;
+	background-color: #f9fafb;
+}
+
+header {
+	padding: 1.5rem;
+	color: #ffffff;
+	background-color: #0f172a;
+	text-align: center;
+}
+
+header h1 {
+	margin: 0;
+}
+
+main {
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 1.5rem;
+}
+
+.ejercicio {
+	padding: 1.25rem;
+	border: 1px solid #e5e7eb;
+	border-radius: 0.5rem;
+	background-color: #ffffff;
+}
+
+.ejercicio h2 {
+	margin-top: 0;
+	color: #0f172a;
+}
+
+code {
+	padding: 0.15rem 0.35rem;
+	border-radius: 0.25rem;
+	color: #0f172a;
+	background-color: #e5e7eb;
+	font-size: 0.9em;
+}
+
+.tabala-scroll {
+	overflow-x: auto;
+	margin: 1rem 0;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	min-width: 560px;
+}
+
+th,
+td {
+	padding: 0.75rem;
+	border: 1px solid #e5e7eb;
+	text-align: left;
+}
+
+th {
+	color: #ffffff;
+	background-color: #0f172a;
+}
+
+tbody tr:nth-child(even) {
+	background-color: #f9fafb;
+}
+
+tbody tr:hover {
+	background-color: #f3f4f6;
+}
+
+.formulario {
+	display: flex;
+	align-items: end;
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid #e5e7eb;
+	border-radius: 0.5rem;
+	background-color: #f9fafb;
+}
+
+.campos {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.4rem;
+}
+
+label {
+	font-weight: 600;
+}
+
+select {
+	width: 100%;
+	padding: 0.6rem;
+	border: 1px solid #e5e7eb;
+	border-radius: 0.375rem;
+	color: #1f2937;
+	background-color: #ffffff;
+	font: inherit;
+}
+
+select:focus,
+button:focus {
+	outline: 2px solid #0f172a;
+	outline-offset: 2px;
+}
+
+button {
+	padding: 0.6rem 1rem;
+	border: none;
+	border-radius: 0.375rem;
+	color: #ffffff;
+	background-color: #0f172a;
+	cursor: pointer;
+	font: inherit;
+}
+
+button:hover {
+	background-color: #0b1220;
+}
+
+.resultado {
+	display: block;
+	min-height: 2.75rem;
+	margin-top: 1rem;
+	padding: 0.75rem;
+	border: 1px solid #bbf7d0;
+	border-radius: 0.375rem;
+	color: #065f46;
+	background-color: #ecfdf5;
+	white-space: pre-wrap;
+}
+
