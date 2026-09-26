@@ -48,9 +48,34 @@
 
             <output class="resultado" id="resultado-arreglo" for="formulario-arreglos"></output>
         </section>
+
+        <section class="ejercicio">
+            <h2>Objetos <code>02-objetos-json.js</code></h2>
+            <p>Selecciona un taller y una operación para consultar sus propiedades.</p>
+
+            <form id="formulario-objetos" class="formulario">
+                <div class="campos">
+                    <label for="taller-objeto">Taller</label>
+                    <select name="taller-objeto" id="taller-objeto"></select>
+                </div>
+                <div class="campos">
+                    <label for="operacion-objeto">Operación</label>
+                    <select name="operacion-objeto" id="operacion-objeto">
+                        <option value="keys">Object.keys - Mostrar propiedades</option>
+                        <option value="values">Object.values - Mostrar valores</option>
+                        <option value="entries">Object.entries - Mostrar campos y valores</option>
+                    </select>
+                </div>
+
+                <button type="submit">Ejecutar</button>
+            </form>
+
+            <output class="resultado" id="resultado-objeto" for="formulario-objetos"></output>
+        </section>
     </main>
 
     <script src="./js/01-arreglos.js"></script>
     <script src="./js/app.js"></script>
+    <script src="./js/02-objetos-json.js"></script>
 </body>
 </html>
