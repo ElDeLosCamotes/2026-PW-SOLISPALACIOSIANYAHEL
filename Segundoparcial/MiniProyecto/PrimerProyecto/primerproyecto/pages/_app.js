@@ -1,5 +1,5 @@
-import Menu from "@/components/Menu";
-import '../styles/style.css';
+import Menu from '../components/Menu'
+import '../styles/styles.css';
 
 export default function App({Component, pageProps}){
     return(
@@ -7,5 +7,5 @@ export default function App({Component, pageProps}){
             <Menu />
             <Component {...pageProps} />
         </>
-    )
+    );
 }
