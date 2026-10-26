@@ -21,6 +21,10 @@ nav button {
   text-decoration: none;
 }
 
+nav a:hover {
+  text-decoration: underline;
+}
+
 nav button {
   margin-left: auto;
   padding: 4px 10px;
@@ -46,11 +50,15 @@ main {
 
 input {
   padding: 6px 8px;
+  font: inherit;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
 }
 
 button {
   padding: 6px 12px;
   cursor: pointer;
+  font: inherit;
 }
 
 button:disabled {
@@ -62,6 +70,10 @@ table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
+}
+
+.tabla-responsive {
+  overflow-x: auto;
 }
 
 th,
