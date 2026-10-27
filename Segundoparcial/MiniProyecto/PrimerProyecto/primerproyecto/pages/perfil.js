@@ -1,165 +1,145 @@
 import { useState } from 'react';
-import Link from 'next/link';
 import { pedirJSON } from '../lib/api';
-import { formatearFecha } from '../lib/formato';
 import { validarBoleta } from '../lib/validaciones';
 import estilos from '../styles/Talleres.module.css';
 
-export default function Perfil() {
+export default function Usuarios() {
     const [boleta, setBoleta] = useState('');
-    const [buscada, setBuscada] = useState('');
-    const [alumno, setAlumno] = useState(null);
-    const [nombreInscrito, setNombreInscrito] = useState('');
-    const [misTalleres, setMisTalleres] = useState([]);
-    const [disponibles, setDisponibles] = useState([]);
-    const [error, setError] = useState('');
+    const [usuario, setUsuario] = useState(null);
+    const [mensaje, setMensaje] = useState('');
+    const [esError, setEsError] = useState(false);
     const [cargando, setCargando] = useState(false);
 
-    async function buscar(evento) {
+    async function consultar(evento) {
         evento.preventDefault();
-        setError('');
-        setBuscada('');
-        setAlumno(null);
-        setNombreInscrito('');
-        setMisTalleres([]);
-        setDisponibles([]);
-
+        setUsuario(null);
+        setMensaje('');
         const boletaLimpia = boleta.trim();
         if (!validarBoleta(boletaLimpia)) {
-            setError('La boleta debe tener 10 dígitos.');
+            setMensaje('La boleta debe tener 10 dígitos.');
+            setEsError(true);
             return;
         }
 
         setCargando(true);
         try {
-            const [usuarios, talleres] = await Promise.all([
-                pedirJSON('/usuarios'),
-                pedirJSON('/talleres'),
-            ]);
-            if (!Array.isArray(usuarios) || !Array.isArray(talleres)) {
-                throw new Error('El backend devolvió datos de perfil no válidos.');
+            const usuarios = await pedirJSON('/usuarios');
+            if (!Array.isArray(usuarios)) {
+                throw new Error('El backend devolvió una lista de usuarios no válida.');
             }
-
-            const listas = await Promise.all(
-                talleres.map((taller) =>
-                    pedirJSON(`/talleres/${encodeURIComponent(String(taller.id))}/asistencias`)
-                )
+            const encontrado = usuarios.find(
+                (registro) => String(registro.boleta).trim() === boletaLimpia
             );
-            const conAsistencias = talleres.map((taller, indice) => {
-                if (!Array.isArray(listas[indice])) {
-                    throw new Error('El backend devolvió una lista de asistentes no válida.');
-                }
-                return { ...taller, asistencias: listas[indice] };
-            });
-            const mios = conAsistencias.filter((taller) =>
-                taller.asistencias.some(
-                    (asistencia) => String(asistencia.boleta).trim() === boletaLimpia
-                )
-            );
-            const conLugar = conAsistencias.filter(
-                (taller) =>
-                    !mios.includes(taller) &&
-                    taller.asistencias.length < Number(taller.cupo)
-            );
-            const inscripcion = mios.length > 0
-                ? mios[0].asistencias.find(
-                    (asistencia) => String(asistencia.boleta).trim() === boletaLimpia
-                )
-                : null;
-
-            setAlumno(
-                usuarios.find((usuario) => String(usuario.boleta).trim() === boletaLimpia) || null
-            );
-            setNombreInscrito(inscripcion ? inscripcion.nombre : '');
-            setMisTalleres(mios);
-            setDisponibles(conLugar);
-            setBuscada(boletaLimpia);
-        } catch (err) {
-            setError(err.message);
+            setUsuario(encontrado || null);
+            setMensaje(encontrado ? 'Usuario encontrado.' : 'No hay un usuario registrado con esa boleta.');
+            setEsError(!encontrado);
+        } catch (error) {
+            setMensaje(error.message);
+            setEsError(true);
         } finally {
             setCargando(false);
         }
     }
 
-    const nombre = alumno ? alumno.nombre : nombreInscrito;
+    async function crear(evento) {
+        evento.preventDefault();
+        const formulario = evento.currentTarget;
+        const datos = new FormData(formulario);
+        const boletaNueva = String(datos.get('boleta')).trim();
+        setMensaje('');
+
+        if (!validarBoleta(boletaNueva)) {
+            setMensaje('La boleta debe tener 10 dígitos.');
+            setEsError(true);
+            return;
+        }
+
+        setCargando(true);
+        try {
+            const creado = await pedirJSON('/usuarios', {
+                method: 'POST',
+                body: JSON.stringify({
+                    nombre: String(datos.get('nombre')).trim(),
+                    correo: String(datos.get('correo')).trim(),
+                    contrasena: datos.get('contrasena'),
+                    boleta: boletaNueva,
+                }),
+            });
+            formulario.reset();
+            setBoleta(boletaNueva);
+            setUsuario(creado);
+            setMensaje('Usuario creado correctamente.');
+            setEsError(false);
+        } catch (error) {
+            setMensaje(error.message);
+            setEsError(true);
+        } finally {
+            setCargando(false);
+        }
+    }
 
     return (
         <main>
-            <h1>Mi perfil</h1>
-            <p>Busca tus datos y talleres usando tu boleta.</p>
-            <form onSubmit={buscar} className="formulario">
-                <label>
-                    Tu boleta (10 dígitos)
-                    <input
-                        inputMode="numeric"
-                        autoComplete="off"
-                        maxLength={10}
-                        value={boleta}
-                        onChange={(evento) => setBoleta(evento.target.value)}
-                    />
-                </label>
-                <button type="submit" disabled={cargando}>
-                    {cargando ? 'Buscando…' : 'Ver mi perfil'}
-                </button>
-            </form>
-            {error && <p className="error" role="alert">{error}</p>}
-            {buscada && (
-                <>
-                    <section className={estilos.panel}>
-                        {alumno ? (
-                            <>
-                                <h2>{alumno.nombre}</h2>
-                                <p><strong>Correo:</strong> {alumno.correo}</p>
-                                <p><strong>Boleta:</strong> {alumno.boleta}</p>
-                                <p><strong>Rol:</strong> {alumno.rol}</p>
-                            </>
-                        ) : (
-                            <p>
-                                La boleta {buscada} no tiene cuenta registrada
-                                {nombreInscrito ? ` (inscripciones a nombre de ${nombreInscrito})` : ''}.
-                                Aun así puedes consultar los talleres disponibles.
-                            </p>
-                        )}
-                    </section>
+            <h1>Usuarios</h1>
+            <p>Crea una cuenta y consulta los datos de un usuario mediante su boleta.</p>
 
-                    <h2>Mis talleres ({misTalleres.length})</h2>
-                    {misTalleres.length === 0 ? (
-                        <p>Todavía no estás inscrito en ningún taller.</p>
-                    ) : (
-                        <ul className={estilos.lista}>
-                            {misTalleres.map((taller) => (
-                                <li key={taller.id}>
-                                    <Link href={`/talleres/${taller.id}`}>{taller.nombre}</Link>
-                                    {' — '}{formatearFecha(taller.fecha)}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+            <section className={estilos.panel}>
+                <h2>Crear usuario</h2>
+                <form className="formulario" onSubmit={crear}>
+                    <label>Nombre completo
+                        <input name="nombre" maxLength="120" autoComplete="name" required />
+                    </label>
+                    <label>Correo electrónico
+                        <input name="correo" type="email" maxLength="180" autoComplete="email" required />
+                    </label>
+                    <label>Contraseña (mínimo 8 caracteres)
+                        <input name="contrasena" type="password" minLength="8" autoComplete="new-password" required />
+                    </label>
+                    <label>Boleta (10 dígitos)
+                        <input
+                            name="boleta"
+                            inputMode="numeric"
+                            pattern="[0-9]{10}"
+                            maxLength="10"
+                            required
+                        />
+                    </label>
+                    <button type="submit" disabled={cargando}>
+                        {cargando ? 'Guardando…' : 'Crear usuario'}
+                    </button>
+                </form>
+            </section>
 
-                    <h2>Talleres con lugar disponible</h2>
-                    {disponibles.length === 0 ? (
-                        <p>No hay más talleres con lugar.</p>
-                    ) : (
-                        <ul className={estilos.lista}>
-                            {disponibles.map((taller) => {
-                                const lugares = Number(taller.cupo) - taller.asistencias.length;
-                                const query = new URLSearchParams({
-                                    boleta: buscada,
-                                    nombre,
-                                });
-                                return (
-                                    <li key={taller.id}>
-                                        {taller.nombre} — {lugares} {lugares === 1 ? 'lugar' : 'lugares'} ·{' '}
-                                        <Link href={`/talleres/${taller.id}?${query.toString()}`}>
-                                            Inscribirme
-                                        </Link>
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    )}
-                </>
-            )}
+            <section className={estilos.panel}>
+                <h2>Consultar usuario por boleta</h2>
+                <form className="formulario" onSubmit={consultar}>
+                    <label>Boleta (10 dígitos)
+                        <input
+                            inputMode="numeric"
+                            maxLength="10"
+                            value={boleta}
+                            onChange={(evento) => setBoleta(evento.target.value)}
+                            required
+                        />
+                    </label>
+                    <button type="submit" disabled={cargando}>
+                        {cargando ? 'Consultando…' : 'Consultar'}
+                    </button>
+                </form>
+                {mensaje && (
+                    <p className={esError ? 'error' : estilos.exito} role={esError ? 'alert' : 'status'}>
+                        {mensaje}
+                    </p>
+                )}
+                {usuario && (
+                    <div>
+                        <h3>{usuario.nombre}</h3>
+                        <p><strong>Correo:</strong> {usuario.correo}</p>
+                        <p><strong>Boleta:</strong> {usuario.boleta}</p>
+                        <p><strong>Rol:</strong> {usuario.rol}</p>
+                    </div>
+                )}
+            </section>
         </main>
     );
 }

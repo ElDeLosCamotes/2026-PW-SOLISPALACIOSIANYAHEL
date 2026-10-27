@@ -6,26 +6,59 @@ import estilos from '../../styles/Talleres.module.css';
 export default function Talleres() {
     const [talleres, setTalleres] = useState([]);
     const [cargando, setCargando] = useState(true);
+    const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState('');
+    const [mensaje, setMensaje] = useState('');
+    const [mensajeError, setMensajeError] = useState(false);
     const [busqueda, setBusqueda] = useState('');
 
-    useEffect(() => {
-        async function cargarTalleres() {
-            try {
-                const datos = await pedirJSON('/talleres');
-                if (!Array.isArray(datos)) {
-                    throw new Error('El backend devolvió una lista de talleres no válida.');
-                }
-                setTalleres(datos);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setCargando(false);
+    async function cargarTalleres() {
+        try {
+            const datos = await pedirJSON('/talleres');
+            if (!Array.isArray(datos)) {
+                throw new Error('El backend devolvió una lista de talleres no válida.');
             }
+            setTalleres(datos);
+            setError('');
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setCargando(false);
         }
+    }
 
+    useEffect(() => {
         cargarTalleres();
     }, []);
+
+    async function crearTaller(evento) {
+        evento.preventDefault();
+        const formulario = evento.currentTarget;
+        const datos = new FormData(formulario);
+        setGuardando(true);
+        setMensaje('');
+        setMensajeError(false);
+        try {
+            await pedirJSON('/talleres', {
+                method: 'POST',
+                body: JSON.stringify({
+                    nombre: String(datos.get('nombre')).trim(),
+                    descripcion: String(datos.get('descripcion')).trim(),
+                    fecha: datos.get('fecha'),
+                    hora: datos.get('hora') || null,
+                    cupo: Number(datos.get('cupo')),
+                }),
+            });
+            formulario.reset();
+            await cargarTalleres();
+            setMensaje('Taller registrado correctamente.');
+        } catch (err) {
+            setMensaje(err.message);
+            setMensajeError(true);
+        } finally {
+            setGuardando(false);
+        }
+    }
 
     const texto = busqueda.trim().toLowerCase();
     const visibles = talleres.filter((taller) =>
@@ -35,6 +68,31 @@ export default function Talleres() {
     return (
         <main>
             <h1>Talleres</h1>
+            <section className={estilos.panel}>
+                <h2>Registrar taller</h2>
+                <form className="formulario" onSubmit={crearTaller}>
+                    <label>Nombre del taller
+                        <input name="nombre" maxLength="150" required />
+                    </label>
+                    <label>Descripción
+                        <textarea name="descripcion" rows="3" />
+                    </label>
+                    <label>Fecha
+                        <input name="fecha" type="date" required />
+                    </label>
+                    <label>Hora
+                        <input name="hora" type="time" />
+                    </label>
+                    <label>Cupo
+                        <input name="cupo" type="number" min="1" step="1" required />
+                    </label>
+                    <button type="submit" disabled={guardando}>
+                        {guardando ? 'Guardando…' : 'Registrar taller'}
+                    </button>
+                </form>
+                {mensaje && <p className={mensajeError ? 'error' : estilos.exito} role={mensajeError ? 'alert' : 'status'}>{mensaje}</p>}
+            </section>
+
             <label className="formulario">
                 <span>Buscar taller</span>
                 <input
