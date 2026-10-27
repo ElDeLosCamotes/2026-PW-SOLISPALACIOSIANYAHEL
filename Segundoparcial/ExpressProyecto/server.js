@@ -44,4 +44,3 @@ app.get('/api/talleres/:tallerId/asistencias', asistencias.consultarListaAsisten
 app.listen(PORT, () => {
     console.log(`Servidor escuchando en el puerto: ${PORT}`);
 })
-

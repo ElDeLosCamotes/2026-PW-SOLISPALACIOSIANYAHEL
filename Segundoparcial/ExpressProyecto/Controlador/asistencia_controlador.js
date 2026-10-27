@@ -13,6 +13,9 @@ async function registrarAsistencia(req, res) {
         }
         res.status(201).json(await asistenciaModel.registrarAsistencia({tallerId, usuarioId}));
     } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY' || error.code === '23505') {
+            return res.status(409).json({error: 'La asistencia de este usuario ya está registrada para el taller'});
+        }
         if (error.code === 'ER_NO_REFERENCED_ROW_2') return res.status(404).json({error: 'Usuario o taller no encontrado'});
         res.status(500).json({error: error.message});
     }
