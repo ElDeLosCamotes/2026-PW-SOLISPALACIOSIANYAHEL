@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { pedirJSON } from '../../lib/api';
 import { formatearFecha, ocultarBoleta } from '../../lib/formato';
-import { validarBoleta } from '../../lib/validaciones';
+import { validarBoleta, validarNombre } from '../../lib/validaciones';
 import estilos from '../../styles/Talleres.module.css';
 
 function normalizarNombre(nombre) {
@@ -31,7 +31,7 @@ export default function DetalleTaller() {
         try {
             const [tallerCargado, asistenciasCargadas] = await Promise.all([
                 pedirJSON(`/talleres/${encodeURIComponent(String(id))}`),
-                pedirJSON(`/talleres/${encodeURIComponent(String(id))}/asistencias`),
+                pedirJSON(`/talleres/${encodeURIComponent(String(id))}/inscripciones`),
             ]);
             if (!Array.isArray(asistenciasCargadas)) {
                 throw new Error('El backend devolvió una lista de asistentes no válida.');
@@ -73,6 +73,10 @@ export default function DetalleTaller() {
             setErrorForm('Escribe tu nombre.');
             return;
         }
+        if (!validarNombre(nombreLimpio)) {
+            setErrorForm('El nombre solo debe contener letras, espacios y acentos.');
+            return;
+        }
         if (!validarBoleta(boletaLimpia)) {
             setErrorForm('La boleta debe tener 10 dígitos.');
             return;
@@ -102,7 +106,7 @@ export default function DetalleTaller() {
                 throw new Error('El nombre no coincide con la cuenta registrada para esa boleta.');
             }
 
-            await pedirJSON(`/talleres/${encodeURIComponent(String(id))}/asistencias`, {
+            await pedirJSON(`/talleres/${encodeURIComponent(String(id))}/inscripciones`, {
                 method: 'POST',
                 body: JSON.stringify({ usuario_id: usuario.id }),
             });
@@ -165,6 +169,8 @@ export default function DetalleTaller() {
                             autoComplete="name"
                             value={nombre}
                             onChange={(evento) => setNombre(evento.target.value)}
+                            pattern="[A-Za-zÁÉÍÓÚÜÑñáéíóúü\s'-]+"
+                            title="Solo se permiten letras, espacios y acentos"
                         />
                     </label>
                     <label>

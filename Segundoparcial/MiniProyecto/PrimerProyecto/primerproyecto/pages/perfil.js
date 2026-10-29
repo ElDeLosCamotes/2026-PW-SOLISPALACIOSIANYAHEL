@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { pedirJSON } from '../lib/api';
-import { validarBoleta } from '../lib/validaciones';
+import { validarBoleta, validarNombre } from '../lib/validaciones';
 import estilos from '../styles/Talleres.module.css';
 
 export default function Usuarios() {
@@ -45,8 +45,15 @@ export default function Usuarios() {
         evento.preventDefault();
         const formulario = evento.currentTarget;
         const datos = new FormData(formulario);
+        const nombre = String(datos.get('nombre')).trim();
         const boletaNueva = String(datos.get('boleta')).trim();
         setMensaje('');
+
+        if (!validarNombre(nombre)) {
+            setMensaje('El nombre solo debe contener letras, espacios y acentos.');
+            setEsError(true);
+            return;
+        }
 
         if (!validarBoleta(boletaNueva)) {
             setMensaje('La boleta debe tener 10 dígitos.');
@@ -59,7 +66,7 @@ export default function Usuarios() {
             const creado = await pedirJSON('/usuarios', {
                 method: 'POST',
                 body: JSON.stringify({
-                    nombre: String(datos.get('nombre')).trim(),
+                    nombre,
                     correo: String(datos.get('correo')).trim(),
                     contrasena: datos.get('contrasena'),
                     boleta: boletaNueva,
@@ -87,7 +94,14 @@ export default function Usuarios() {
                 <h2>Crear usuario</h2>
                 <form className="formulario" onSubmit={crear}>
                     <label>Nombre completo
-                        <input name="nombre" maxLength="120" autoComplete="name" required />
+                        <input
+                            name="nombre"
+                            maxLength="120"
+                            autoComplete="name"
+                            pattern="[A-Za-zÁÉÍÓÚÜÑñáéíóúü\s'-]+"
+                            title="Solo se permiten letras, espacios y acentos"
+                            required
+                        />
                     </label>
                     <label>Correo electrónico
                         <input name="correo" type="email" maxLength="180" autoComplete="email" required />

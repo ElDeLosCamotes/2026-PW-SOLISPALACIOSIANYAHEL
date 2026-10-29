@@ -36,6 +36,7 @@ app.get('/api/talleres/:id', talleres.obtenerTaller);
 app.post('/api/talleres', talleres.crearTaller);
 app.patch('/api/talleres/:id', talleres.actualizarTaller);
 app.delete('/api/talleres/:id', talleres.eliminarTaller);
+app.get('/api/talleres/:id/inscripciones', talleres.consultarInscripcionesEnTaller);
 app.post('/api/talleres/:id/inscripciones', talleres.registrarseEnTaller);
 
 app.post('/api/talleres/:tallerId/asistencias', asistencias.registrarAsistencia);

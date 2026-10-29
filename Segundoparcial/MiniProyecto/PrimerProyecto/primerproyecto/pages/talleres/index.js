@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import TarjetaTaller from '../../components/TarjetaTaller';
 import { pedirJSON } from '../../lib/api';
+import { validarFecha, validarNombre } from '../../lib/validaciones';
 import estilos from '../../styles/Talleres.module.css';
 
 export default function Talleres() {
@@ -35,16 +36,33 @@ export default function Talleres() {
         evento.preventDefault();
         const formulario = evento.currentTarget;
         const datos = new FormData(formulario);
+        const nombre = String(datos.get('nombre')).trim();
+        const fecha = String(datos.get('fecha')).trim();
         setGuardando(true);
         setMensaje('');
         setMensajeError(false);
+
+        if (!validarNombre(nombre)) {
+            setMensaje('El nombre del taller solo debe contener letras, espacios y acentos.');
+            setMensajeError(true);
+            setGuardando(false);
+            return;
+        }
+
+        if (!validarFecha(fecha)) {
+            setMensaje('La fecha del taller es inválida. No uses años muy antiguos, por ejemplo 1200.');
+            setMensajeError(true);
+            setGuardando(false);
+            return;
+        }
+
         try {
             await pedirJSON('/talleres', {
                 method: 'POST',
                 body: JSON.stringify({
-                    nombre: String(datos.get('nombre')).trim(),
+                    nombre,
                     descripcion: String(datos.get('descripcion')).trim(),
-                    fecha: datos.get('fecha'),
+                    fecha,
                     hora: datos.get('hora') || null,
                     cupo: Number(datos.get('cupo')),
                 }),
@@ -72,13 +90,24 @@ export default function Talleres() {
                 <h2>Registrar taller</h2>
                 <form className="formulario" onSubmit={crearTaller}>
                     <label>Nombre del taller
-                        <input name="nombre" maxLength="150" required />
+                        <input
+                            name="nombre"
+                            maxLength="150"
+                            pattern="[A-Za-zÁÉÍÓÚÜÑñáéíóúü\s'-]+"
+                            title="Solo se permiten letras, espacios y acentos"
+                            required
+                        />
                     </label>
                     <label>Descripción
                         <textarea name="descripcion" rows="3" />
                     </label>
                     <label>Fecha
-                        <input name="fecha" type="date" required />
+                        <input
+                            name="fecha"
+                            type="date"
+                            min="1900-01-01"
+                            required
+                        />
                     </label>
                     <label>Hora
                         <input name="hora" type="time" />

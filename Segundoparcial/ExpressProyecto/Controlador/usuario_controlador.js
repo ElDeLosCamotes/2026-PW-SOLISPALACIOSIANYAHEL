@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const usuariosModel = require('../Modelo/usuario');
 
+const validarNombre = (nombre) => /^[A-Za-zÁÉÍÓÚÜÑñáéíóúü\s'-]+$/.test(String(nombre).trim()) && String(nombre).trim().length >= 2;
 const validarCorreo = (correo) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
 const validarBoleta = (boleta) => /^\d{10}$/.test(String(boleta));
 const validarContrasena = (contrasena) => contrasena.length >= 8;
@@ -36,6 +37,7 @@ async function crearUsuario(req, res) {
     if(!nombre || !correo || !contrasena || !boleta){
         return res.status(400).json({error: 'nombre, correo, contraseña, y boleta son obligatorios, favor de verificar los datos'});
     }
+    if(!validarNombre(nombre)) return res.status(400).json({error: 'El nombre solo debe contener letras, espacios y acentos'});
     if(!validarCorreo(correo)) return res.status(400).json({error: 'El correo no tiene un formato valido'});
     if(!validarBoleta(boleta)) return res.status(400).json({error: 'La boleta debe tener 10 digitos'});
     if(!validarContrasena(contrasena)) return res.status(400).json({error: 'La contraseña debe tener al menos 8 caracteres'});
