@@ -138,7 +138,7 @@ export default function DetalleTaller() {
             <h1>{taller.nombre}</h1>
             {taller.descripcion && <p>{taller.descripcion}</p>}
             <section className={estilos.panel} aria-label="Disponibilidad del taller">
-                <p><strong>Instructor:</strong> Por confirmar</p>
+                <p><strong>Instructor:</strong> {taller.instructor || 'Por confirmar'}</p>
                 <p><strong>Fecha:</strong> {formatearFecha(taller.fecha)}</p>
                 {taller.hora && <p><strong>Hora:</strong> {String(taller.hora).slice(0, 5)}</p>}
                 <div

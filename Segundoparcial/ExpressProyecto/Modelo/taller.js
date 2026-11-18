@@ -1,25 +1,33 @@
 const pool = require('../db-local');
 
 async function listar() {
-    const [filas] = await pool.query('SELECT id, nombre, descripcion, fecha, hora, cupo FROM talleres ORDER BY fecha, hora');
+    const [filas] = await pool.query(`
+        SELECT t.id, t.nombre, t.instructor, t.descripcion, t.fecha, t.hora, t.cupo,
+            (SELECT COUNT(*) FROM asistencias a WHERE a.taller_id = t.id) AS asistentes
+        FROM talleres t
+        ORDER BY t.fecha, t.hora`);
     return filas;
 }
 
 async function obtenerPorId(id) {
-    const [filas] = await pool.query('SELECT id, nombre, descripcion, fecha, hora, cupo FROM talleres WHERE id = ?', [id]);
+    const [filas] = await pool.query(`
+        SELECT t.id, t.nombre, t.instructor, t.descripcion, t.fecha, t.hora, t.cupo,
+            (SELECT COUNT(*) FROM asistencias a WHERE a.taller_id = t.id) AS asistentes
+        FROM talleres t
+        WHERE t.id = ?`, [id]);
     return filas[0];
 }
 
-async function crear({nombre, descripcion, fecha, hora, cupo}) {
+async function crear({nombre, instructor, descripcion, fecha, hora, cupo}) {
     const [info] = await pool.query(
-        'INSERT INTO talleres (nombre, descripcion, fecha, hora, cupo) VALUES (?, ?, ?, ?, ?)',
-        [nombre, descripcion || null, fecha, hora || null, cupo]
+        'INSERT INTO talleres (nombre, instructor, descripcion, fecha, hora, cupo) VALUES (?, ?, ?, ?, ?, ?)',
+        [nombre, instructor || null, descripcion || null, fecha, hora || null, cupo === undefined ? 20 : cupo]
     );
     return obtenerPorId(info.insertId);
 }
 
-async function actualizar(id, {nombre, descripcion, fecha, hora, cupo}) {
-    const cambios = Object.entries({nombre, descripcion, fecha, hora, cupo}).filter(([, valor]) => valor !== undefined);
+async function actualizar(id, {nombre, instructor, descripcion, fecha, hora, cupo}) {
+    const cambios = Object.entries({nombre, instructor, descripcion, fecha, hora, cupo}).filter(([, valor]) => valor !== undefined);
     if (cambios.length === 0) return obtenerPorId(id);
 
     const columnas = cambios.map(([columna]) => `${columna} = ?`).join(', ');

@@ -137,7 +137,7 @@ export default function Asistencia() {
                                         <tr key={asistencia.id}>
                                             <td>{asistencia.nombre}</td>
                                             <td>{asistencia.boleta}</td>
-                                            <td>{String(asistencia.fecha_asistencia).replace('T', ' ')}</td>
+                                            <td>{String(asistencia.fecha_registro).replace('T', ' ')}</td>
                                         </tr>
                                     ))}
                                 </tbody>

@@ -1,0 +1,347 @@
+{
+  "info": {
+    "_postman_id": "d30ac1e4-e0d2-48ac-9af0-46c7e4c4e1f3",
+    "name": "Demo de sesiones - Parcial 3",
+    "description": "Pruebas locales de login, cookie de sesión, autorización 401/403, logout y regeneración contra http://localhost:4600. Ejecuta las solicitudes en orden y deja habilitado el cookie jar de Postman; no agregues el encabezado Cookie manualmente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Preparar estado limpio",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/logout",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "logout"]
+        },
+        "description": "Cierra una sesión de una ejecución anterior y limpia la cookie guardada en el jar."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Logout responde 200', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Perfil sin sesión (401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/perfil",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "perfil"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Sin sesión responde 401', function () { pm.response.to.have.status(401); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Login con contraseña incorrecta (401)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"ana\",\n  \"contrasena\": \"incorrecta\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Contraseña incorrecta responde 401 y no crea cookie', function () {",
+              "  pm.response.to.have.status(401);",
+              "  pm.expect(pm.response.headers.get('Set-Cookie')).to.be.null;",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Crear sesión visitante",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/visita",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "visita"]
+        },
+        "description": "Crea una sesión anónima para que el login pueda mostrar el cambio de id de sesión."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Visita crea una sesión', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const data = pm.response.json();",
+              "  pm.expect(data.visitas).to.eql(1);",
+              "  pm.collectionVariables.set('sesionAnonima', data.sesion);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Login Ana",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"ana\",\n  \"contrasena\": \"ana12345\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login correcto y cookie de sesión', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const data = pm.response.json();",
+              "  pm.expect(data.usuario.usuario).to.eql('ana');",
+              "  pm.expect(data.usuario.contrasena_hash).to.be.undefined;",
+              "  pm.expect(pm.response.headers.get('Set-Cookie')).to.include('connect.sid=');",
+              "});",
+              "pm.test('El login regenera el id para prevenir fijación', function () {",
+              "  const data = pm.response.json();",
+              "  pm.expect(data.sesionAntes).to.eql(pm.collectionVariables.get('sesionAnonima'));",
+              "  pm.expect(data.sesionDespues).not.to.eql(data.sesionAntes);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Consultar perfil (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/perfil",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "perfil"]
+        },
+        "description": "Postman debe enviar connect.sid desde el cookie jar. En la primera consulta, visitas debe ser 2 (visita anónima + perfil)."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Ana consulta su perfil con cookie', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const data = pm.response.json();",
+              "  pm.expect(data.usuario.usuario).to.eql('ana');",
+              "  pm.expect(data.visitas).to.be.at.least(2);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Ana no puede ver el reporte (403)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/reporte",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "reporte"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Ana está autenticada pero no autorizada', function () {",
+              "  pm.response.to.have.status(403);",
+              "  pm.expect(pm.response.json().error).to.include('solo para admin');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Cerrar sesión",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/logout",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "logout"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Logout destruye la sesión', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Perfil después del logout (401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/perfil",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "perfil"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('La cookie invalidada ya no autentica', function () { pm.response.to.have.status(401); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Login administrador",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"usuario\": \"admin\",\n  \"contrasena\": \"admin12345\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Admin inicia sesión', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().usuario.rol).to.eql('admin');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Admin consulta el reporte (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/admin/reporte",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "admin", "reporte"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Admin tiene acceso al reporte', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().usuario.rol).to.eql('admin');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "sesionAnonima",
+      "value": ""
+    }
+  ]
+}

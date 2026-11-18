@@ -1,13 +1,5 @@
 const talleresModel = require('../Modelo/taller');
 
-const validarNombre = (nombre) => /^[A-Za-zÁÉÍÓÚÜÑñáéíóúü\s'-]+$/.test(String(nombre).trim()) && String(nombre).trim().length >= 2;
-const validarFecha = (fecha) => {
-    const valor = String(fecha ?? '').trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
-    const fechaDate = new Date(`${valor}T00:00:00`);
-    return !Number.isNaN(fechaDate.getTime()) && fechaDate.getFullYear() >= 1900;
-};
-
 function esDuplicado(error) {
     return error.code === 'ER_DUP_ENTRY' || error.code === '23505';
 }
@@ -21,6 +13,7 @@ async function listarTalleres(req, res) {
 }
 
 async function obtenerTaller(req, res) {
+    if (!esIdValido(req.params.id)) return res.status(404).json({error: 'Taller no encontrado'});
     try {
         const taller = await talleresModel.consultarPorTaller(req.params.id);
         if (!taller) return res.status(404).json({error: 'Taller no encontrado'});
@@ -31,9 +24,12 @@ async function obtenerTaller(req, res) {
 }
 
 async function crearTaller(req, res) {
-    const {nombre, fecha, cupo} = req.body;
-    if (!nombre || !fecha || !Number.isInteger(Number(cupo)) || Number(cupo) < 1) {
-        return res.status(400).json({error: 'nombre, fecha y un cupo entero mayor que cero son obligatorios'});
+    const {nombre, fecha, cupo} = req.body || {};
+    if (!nombre || !fecha) {
+        return res.status(400).json({error: 'nombre y fecha son obligatorios'});
+    }
+    if (cupo !== undefined && (!Number.isInteger(Number(cupo)) || Number(cupo) < 1)) {
+        return res.status(400).json({error: 'cupo debe ser un entero mayor que cero'});
     }
     if (!validarNombre(nombre)) {
         return res.status(400).json({error: 'El nombre del taller solo debe contener letras, espacios y acentos'});
@@ -49,7 +45,8 @@ async function crearTaller(req, res) {
 }
 
 async function actualizarTaller(req, res) {
-    if (Object.keys(req.body).length === 0) {
+    if (!esIdValido(req.params.id)) return res.status(404).json({error: 'Taller no encontrado'});
+    if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({error: 'Debe enviar al menos un campo para actualizar'});
     }
     try {
@@ -62,6 +59,7 @@ async function actualizarTaller(req, res) {
 }
 
 async function eliminarTaller(req, res) {
+    if (!esIdValido(req.params.id)) return res.status(404).json({error: 'Taller no encontrado'});
     try {
         if (!await talleresModel.eliminar(req.params.id)) return res.status(404).json({error: 'Taller no encontrado'});
         res.status(204).send();
@@ -86,6 +84,7 @@ async function registrarseEnTaller(req, res) {
         return res.status(400).json({error: 'usuario_id debe ser un entero positivo'});
     }
     try {
+        if (!esIdValido(req.params.id)) return res.status(404).json({error: 'Taller no encontrado'});
         const taller = await talleresModel.consultarPorTaller(req.params.id);
         if (!taller) return res.status(404).json({error: 'Taller no encontrado'});
         res.status(201).json(await talleresModel.registrarse(req.params.id, usuarioId));

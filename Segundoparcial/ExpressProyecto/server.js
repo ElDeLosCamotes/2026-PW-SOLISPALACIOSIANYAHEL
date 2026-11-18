@@ -10,6 +10,9 @@ const asistencias = require('./Controlador/asistencia_controlador');
 
 const PORT = process.env.PORT || 4000;
 
+app.get('/', (req, res) => {
+    res.json({mensaje: 'API de Registro de Asistencia - CECyT 9 funcionando correctamente'});
+});
 
 //tenemos la ruta principal por medio del metodo get
 app.get('/saludo', (req, res) => {
@@ -28,6 +31,7 @@ app.post('/eco', (req, res) => {
 app.get('/api/usuarios', usuarios.listarUsuarios);
 app.get('/api/usuarios/:id', usuarios.obtenerUsuario);
 app.post('/api/usuarios', usuarios.crearUsuario);
+app.put('/api/usuarios/:id', usuarios.actualizarUsuario);
 app.patch('/api/usuarios/:id', usuarios.actualizarUsuario);
 app.delete('/api/usuarios/:id', usuarios.eliminarUsuario);
 
@@ -39,6 +43,7 @@ app.delete('/api/talleres/:id', talleres.eliminarTaller);
 app.get('/api/talleres/:id/inscripciones', talleres.consultarInscripcionesEnTaller);
 app.post('/api/talleres/:id/inscripciones', talleres.registrarseEnTaller);
 
+app.post('/api/asistencias', asistencias.registrarAsistencia);
 app.post('/api/talleres/:tallerId/asistencias', asistencias.registrarAsistencia);
 app.get('/api/talleres/:tallerId/asistencias', asistencias.consultarListaAsistencia);
 

@@ -60,7 +60,7 @@ export default function Talleres() {
             await pedirJSON('/talleres', {
                 method: 'POST',
                 body: JSON.stringify({
-                    nombre,
+                    nombre: String(datos.get('nombre')).trim(),
                     descripcion: String(datos.get('descripcion')).trim(),
                     fecha,
                     hora: datos.get('hora') || null,
@@ -97,6 +97,9 @@ export default function Talleres() {
                             title="Solo se permiten letras, espacios y acentos"
                             required
                         />
+                    </label>
+                    <label>Instructor
+                        <input name="instructor" maxLength="120" />
                     </label>
                     <label>Descripción
                         <textarea name="descripcion" rows="3" />
