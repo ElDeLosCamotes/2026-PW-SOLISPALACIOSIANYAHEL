@@ -31,6 +31,17 @@ CREATE TABLE sessions (
   PRIMARY KEY (session_id)
 );
 
+-- Lista negra de JWT (semana 13): tokens que ya no se aceptan aunque su firma y su exp sigan bien.
+-- jti         = el id único del token (claim jti)
+-- expira      = cuándo vence el token (su exp); después de esa fecha la fila ya se puede borrar
+-- revocado_en = cuándo se revocó (logout o refresh)
+CREATE TABLE tokens_revocados (
+  jti VARCHAR(64) NOT NULL PRIMARY KEY,
+  usuario VARCHAR(30) NOT NULL,
+  expira DATETIME NOT NULL,
+  revocado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Contraseñas: ana12345, luis12345 y admin12345
 INSERT INTO usuarios (usuario, nombre, rol, contrasena_hash) VALUES
   ('ana', 'Ana López', 'alumno', '$2a$10$zngOdAyKeY6JTTKdax4nwu9nq7YOkXlSCCfouJLolZF6JR0QIabSy'),
